@@ -1,0 +1,175 @@
+import com.aspose.words.Document;
+import com.aspose.words.SaveOutputParameters;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import static java.io.FileDescriptor.out;
+
+public class Demo {
+
+    private JFrame frame;
+    private JTextField txtPath;
+    public  String FilePath,txtFilePath;
+    JFileChooser chooser = new JFileChooser();
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) throws Exception{
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    Demo window = new Demo();
+                    window.frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+       });
+    }
+
+    /**
+     * Create the application.
+     */
+    public Demo() throws Exception {
+        initialize();
+    }
+
+
+    /**
+     * Initialize the contents of the frame.
+     */
+    private void initialize() {
+        frame = new JFrame();
+        frame.setBounds(100, 100, 450, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setLayout(null);
+
+        txtPath = new JTextField();
+        txtPath.setBounds(10, 10, 414, 21);
+        frame.getContentPane().add(txtPath);
+        txtPath.setColumns(10);
+
+        JButton btnBrowse = new JButton("Browse");
+        btnBrowse.setBounds(150, 60, 87, 23);
+        frame.getContentPane().add(btnBrowse);
+
+
+
+
+      /*  JButton submit = new JButton("Submit");
+        submit.setBounds(100, 41, 87, 23);
+        frame.getContentPane().add(submit);*/
+
+        btnBrowse.addActionListener(new ActionListener()  {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+
+
+                // For Choosing Doc File
+                FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                        "DOC & DOCX File", "doc", "docx");
+                chooser.setFileFilter(filter);
+                int returnVal = chooser.showOpenDialog(null);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    FilePath = chooser.getSelectedFile().getPath();
+
+                }
+
+                Document doc = null;
+                try {
+                    doc = new Document(chooser.getSelectedFile().getPath());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+                
+                //Creating instance of JFileChooser for text file
+                JOptionPane.showMessageDialog(null, "Enter Text File");
+                JFileChooser fileChooser1 = new JFileChooser();
+
+                //setup directory to home directory
+                fileChooser1.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+                //show up the dialogue
+                int result1;
+                result1 = fileChooser1.showOpenDialog(frame);
+
+                if (result1 == JFileChooser.APPROVE_OPTION) {
+                    // user selects a file
+                    File selectedFile1 = fileChooser1.getSelectedFile();
+                    //  System.out.println(""+ fileChooser1.getSelectedFile().getAbsolutePath());
+                }
+
+
+
+                //////////////////////
+                Reader reader = null;
+
+                try {
+                    reader = new InputStreamReader(
+                            new FileInputStream(fileChooser1.getSelectedFile().getAbsolutePath()),"Unicode");
+                } catch (UnsupportedEncodingException e1) {
+                    e1.printStackTrace();
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                List<String> lines = new ArrayList<String>();
+                String line = null;
+
+                try {
+                    while ((line = bufferedReader.readLine()) != null)
+                    {
+                        lines.add(line);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+                //Core logic for search and replace text from document
+                for(int i=0;i<lines.size();i++){
+                    String[] splitting = lines.get(i).split("\t");
+
+                    try {
+                        doc.getRange().replace(splitting[0],splitting[1],true,false);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                }
+
+                try {
+                    bufferedReader.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+                //Save output file
+                try {
+                    JFileChooser SaveFileChooser = new JFileChooser( );
+                    SaveFileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+                    int resultSaveFile = SaveFileChooser.showSaveDialog(frame);
+                    if (resultSaveFile == JFileChooser.APPROVE_OPTION) {
+                        doc.save(String.format(SaveFileChooser.getSelectedFile().getAbsolutePath()));
+                    }
+
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                JOptionPane.showMessageDialog(null,"Successfully Replaced","Done",JOptionPane.INFORMATION_MESSAGE);
+
+
+
+            }
+        });
+
+    }
+}
